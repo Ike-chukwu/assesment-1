@@ -1,5 +1,6 @@
 import React, { useReducer } from "react";
 import MkdSDK from "./utils/MkdSDK";
+import { useNavigate } from "react-router";
 
 export const AuthContext = React.createContext();
 
@@ -16,6 +17,10 @@ const reducer = (state, action) => {
       //TODO
       return {
         ...state,
+        isAuthenticated: action.payload.isAuthenticated,
+        role: action.payload.role,
+        token: action.payload.token,
+        user: action.payload.user,
       };
     case "LOGOUT":
       localStorage.clear();
@@ -23,6 +28,8 @@ const reducer = (state, action) => {
         ...state,
         isAuthenticated: false,
         user: null,
+        token: null,
+        role: null,
       };
     default:
       return state;
@@ -43,9 +50,22 @@ export const tokenExpireError = (dispatch, errorMessage) => {
 
 const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
-
+  // const navigate = useNavigate();
   React.useEffect(() => {
     //TODO
+    sdk.check("admin");
+    const checkAuth = async () => {
+      try {
+        await sdk.check("admin");
+        // window.location.href = "/admin/dashboard";
+        // navigate("/admin/dashboard");
+      } catch (error) {
+        console.error("Authorization check failed:", error.message);
+        // window.location.href = "/admin/login";
+      }
+    };
+
+    checkAuth();
   }, []);
 
   return (
